@@ -1,12 +1,14 @@
 import sys
 import types
 
-# Mock module for missing dependency
+# Mock missing dependency
 gen_module = types.ModuleType("gen")
 java_module = types.ModuleType("javaLabeled")
 
+
 class DummyParser:
     pass
+
 
 java_module.JavaParserLabeled = DummyParser
 gen_module.javaLabeled = java_module
@@ -17,39 +19,99 @@ sys.modules["gen.javaLabeled"] = java_module
 from openunderstand.utils.utilities import ClassTypeData
 
 
-class DummyClass:
-    def getText(self):
-        return "ChildClass"
-
-
-def test_set_parent_class():
+def test_package_name():
     obj = ClassTypeData()
-    obj.set_parent_class("ParentClass")
 
-    assert obj.parentClass == "ParentClass"
+    obj.set_package_name("com.example")
+
+    assert obj.package_name == "com.example"
 
 
-def test_set_child_class():
+def test_parent_class():
     obj = ClassTypeData()
-    child = DummyClass()
 
-    obj.set_child_class(child)
+    obj.set_parent_class("Parent")
 
-    assert obj.childClass == child
+    assert obj.parentClass == "Parent"
 
 
-def test_get_long_name():
+def test_child_class():
+    obj = ClassTypeData()
+
+    class DummyChild:
+        def getText(self):
+            return "Child"
+
+    obj.set_child_class(DummyChild())
+
+    assert obj.childClass.getText() == "Child"
+
+
+def test_long_name():
     obj = ClassTypeData()
 
     obj.set_package_name("com.test")
-    obj.set_child_class(DummyClass())
 
-    assert obj.get_long_name() == "com.test.ChildClass"
+    class DummyChild:
+        def getText(self):
+            return "Child"
+
+    obj.set_child_class(DummyChild())
+
+    assert obj.get_long_name() == "com.test.Child"
 
 
-def test_get_type():
+def test_multiple_children():
     obj = ClassTypeData()
 
-    obj.set_parent_class("BaseClass")
+    class DummyChild:
+        def getText(self):
+            return "Node"
 
-    assert obj.get_type() == "extends BaseClass"
+    child1 = DummyChild()
+    child2 = DummyChild()
+
+    obj.set_child_class(child1)
+    obj.set_child_class(child2)
+
+    assert obj.childClass.getText() == "Node"
+
+
+def test_full_class_data():
+    obj = ClassTypeData()
+
+    obj.set_package_name("com.full")
+    obj.set_parent_class("BaseParent")
+
+    class DummyChild:
+        def getText(self):
+            return "FullChild"
+
+    child = DummyChild()
+
+    obj.set_child_class(child)
+
+    assert obj.package_name == "com.full"
+    assert obj.parentClass == "BaseParent"
+    assert obj.childClass.getText() == "FullChild"
+    assert obj.get_long_name() == "com.full.FullChild"
+
+
+def test_replace_child_class():
+    obj = ClassTypeData()
+
+    class ChildA:
+        def getText(self):
+            return "A"
+
+    class ChildB:
+        def getText(self):
+            return "B"
+
+    obj.set_child_class(ChildA())
+
+    assert obj.childClass.getText() == "A"
+
+    obj.set_child_class(ChildB())
+
+    assert obj.childClass.getText() == "B"
