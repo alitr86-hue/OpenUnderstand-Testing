@@ -95,3 +95,5 @@ If an argument is not provided, the following default values will be used:
 
 ### BUILDING
     python3 setup.py sdist bdist_wheel
+    ## GitHub PR Automation Bonus Challenge
+This branch demonstrates automated CI validation during pull request workflows.
