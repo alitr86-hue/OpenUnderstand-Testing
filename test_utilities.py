@@ -145,3 +145,79 @@ def test_package_name_with_numbers():
 
 
 def test_parent_class_empty_string():
+    obj = ClassTypeData()
+    obj.set_parent_class("")
+    assert obj.parentClass == ""
+
+
+def test_parent_class_multiple_updates():
+    obj = ClassTypeData()
+    obj.set_parent_class("Parent1")
+    obj.set_parent_class("Parent2")
+    obj.set_parent_class("Parent3")
+    assert obj.parentClass == "Parent3"
+
+
+def test_package_name_deep_nesting():
+    obj = ClassTypeData()
+    deep = "org.springframework.boot.autoconfigure.web.servlet.error"
+    obj.set_package_name(deep)
+    assert obj.package_name == deep
+
+
+def test_independent_instances():
+    obj1 = ClassTypeData()
+    obj2 = ClassTypeData()
+    obj1.set_package_name("com.instance1")
+    obj2.set_package_name("com.instance2")
+    assert obj1.package_name == "com.instance1"
+    assert obj2.package_name == "com.instance2"
+
+
+def test_parent_class_special_characters():
+    obj = ClassTypeData()
+    obj.set_parent_class("Parent$Class_123")
+    assert obj.parentClass == "Parent$Class_123"
+
+
+def test_multiple_sequential_operations():
+    obj = ClassTypeData()
+    obj.set_package_name("com.second")
+    obj.set_parent_class("ParentClass")
+
+    class DummyChild:
+        def getText(self):
+            return "ChildClass"
+
+    obj.set_child_class(DummyChild())
+    assert "ChildClass" in obj.get_long_name()
+
+
+def test_child_class_none():
+    obj = ClassTypeData()
+    if hasattr(obj, 'childClass'):
+        result = obj.childClass
+        assert result is None or hasattr(result, 'getText')
+
+
+def test_long_name_without_package():
+    obj = ClassTypeData()
+
+    class DummyChild:
+        def getText(self):
+            return "OnlyChild"
+
+    obj.set_child_class(DummyChild())
+    assert "OnlyChild" in obj.get_long_name()
+
+
+def test_long_name_empty_package():
+    obj = ClassTypeData()
+    obj.set_package_name("")
+
+    class DummyChild:
+        def getText(self):
+            return "TestClass"
+
+    obj.set_child_class(DummyChild())
+    assert "TestClass" in obj.get_long_name()
