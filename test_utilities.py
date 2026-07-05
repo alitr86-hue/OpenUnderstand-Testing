@@ -298,6 +298,34 @@ def test_multi_pass_reparse_is_stable():
     assert first_pass.package_name == second_pass.package_name
 
 
+def test_real_world_open_source_class_apache_commons_lang():
+    """
+    Uses an UNMODIFIED real-world Java class copied verbatim from a
+    well-known open-source project — Apache Commons Lang
+    (org.apache.commons.lang3.exception.CloneFailedException), licensed
+    under Apache License 2.0 — rather than a handcrafted fixture. This
+    demonstrates ClassTypeData works correctly against genuine,
+    production, real-world Java source, not just purpose-built samples.
+
+    Source: https://github.com/apache/commons-lang/blob/master/src/main/
+    java/org/apache/commons/lang3/exception/CloneFailedException.java
+    """
+    result = parse_java_file(java_sample("CloneFailedException_real_world.java"))
+    ctx = result.first_class_ctx
+    real_superclass = result.superclass_of(ctx)
+
+    obj = ClassTypeData()
+    obj.set_package_name(result.package_name)
+    obj.set_child_class(ctx)
+    obj.set_parent_class(real_superclass)
+
+    assert result.package_name == "org.apache.commons.lang3.exception"
+    assert obj.get_name() == "CloneFailedException"
+    assert real_superclass == "RuntimeException"
+    assert obj.get_type() == "extends RuntimeException"
+    assert len(result.syntax_errors) == 0
+
+
 # ---------------------------------------------------------------------------
 # Field-level unit tests (no Java source involved — these were already
 # testing plain Python attribute assignment correctly, so they're kept)
