@@ -22,8 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov coverage flake8 cosmic-ray pynguin hypothesis
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install -r requirements.txt
 
     - name: Run Linting (Flake8 Quality Gate)
       run: |
@@ -33,4 +32,10 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/openunderstand
       run: |
-        python -m pytest --cov=openunderstand.utils.utilities --cov-branch --cov-fail-under=80 test_utilities.py || true
+        python -m pytest test_utilities.py -v --cov=openunderstand.utils.utilities --cov-branch --cov-report=term-missing --cov-report=html:HTML_Coverage_Report --cov-fail-under=60
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: HTML_Coverage_Report
